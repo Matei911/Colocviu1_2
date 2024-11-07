@@ -59,6 +59,14 @@ class Colocviu1_2MainActivity : AppCompatActivity() {
             intent.putExtra("SUM_RESULT", sum)
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
+
+            //daca suma este mai mare decat 10, se foloseste serviciul Colocviu1_2Service
+            if (sum > 10) {
+                val serviceIntent = Intent()
+                serviceIntent.setClassName("ro.pub.cs.systems.eim.Colocviu1_2", "ro.pub.cs.systems.eim.Colocviu1_2.Colocviu1_2Service")
+                serviceIntent.putExtra("SUM_RESULT", sum)
+                startService(serviceIntent)
+            }
         }
     }
 
