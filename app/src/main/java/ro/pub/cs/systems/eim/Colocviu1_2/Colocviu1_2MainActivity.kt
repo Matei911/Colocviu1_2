@@ -1,9 +1,11 @@
 package ro.pub.cs.systems.eim.Colocviu1_2
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -24,19 +26,20 @@ class Colocviu1_2MainActivity : AppCompatActivity() {
         val putNumberEditText = findViewById<EditText>(R.id.put_number)
         val addButton = findViewById<Button>(R.id.add_button)
         val displayNumberTextView = findViewById<TextView>(R.id.display_number)
+        val computeButton = findViewById<Button>(R.id.compute_button)
+
+        // Restaurăm conținutul din TextView dacă este disponibil
+        savedInstanceState?.let {
+            displayNumberTextView.text = it.getString("displayText", "")
+        }
 
         // Setăm un listener pentru butonul "Add"
         addButton.setOnClickListener {
-            // Citim textul din EditText
             val numberText = putNumberEditText.text.toString()
-
             if (numberText.isNotEmpty()) {
-                // Dacă există text în EditText, îl adăugăm la TextView cu un "+"
                 displayNumberTextView.text = "${displayNumberTextView.text}$numberText+"
-                // Curățăm EditText-ul
                 putNumberEditText.text.clear()
             } else {
-                // Dacă EditText-ul este gol, eliminăm ultimul caracter "+" din TextView, dacă există
                 val currentText = displayNumberTextView.text.toString()
                 if (currentText.isNotEmpty() && currentText.last() == '+') {
                     displayNumberTextView.text = currentText.dropLast(1)
@@ -44,5 +47,32 @@ class Colocviu1_2MainActivity : AppCompatActivity() {
             }
         }
 
+        // Setăm un listener pentru butonul "Compute"
+        computeButton.setOnClickListener {
+            val currentText = displayNumberTextView.text.toString().removeSuffix("+")
+            val sum = currentText.split("+")
+                .filter { it.isNotEmpty() }
+                .map { it.toIntOrNull() ?: 0 }
+                .sum()
+
+            val intent = Intent(this, Colocviu1_2SecondaryActivity::class.java)
+            intent.putExtra("SUM_RESULT", sum)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+        }
+    }
+
+    // Salvăm textul din TextView înainte de a schimba orientarea
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val displayTextView = findViewById<TextView>(R.id.display_number)
+        outState.putString("displayText", displayTextView.text.toString())
+    }
+
+    // Restaurăm textul din TextView după schimbarea orientării
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val displayTextView = findViewById<TextView>(R.id.display_number)
+        displayTextView.text = savedInstanceState.getString("displayText", "")
     }
 }
